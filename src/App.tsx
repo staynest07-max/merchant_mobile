@@ -41,8 +41,7 @@ import { useMerchantVisits } from './features/merchantVisits/hooks/useMerchantVi
 import { toVisitItem } from './features/merchantVisits/mapper';
 import { useMerchantNotifications, useMerchantUnreadCount } from './features/merchantNotifications/hooks/useMerchantNotifications';
 import { toLegacyNotification } from './features/merchantNotifications/mapper';
-import { AdminApp } from './components/admin/AdminApp';
-import { isAdminRole, navigateToPrincipalDashboard } from './features/auth/routing';
+import { navigateToPrincipalDashboard } from './features/auth/routing';
 
 export function MerchantApp() {
   // Navigation State
@@ -318,6 +317,5 @@ export default function App() {
   if (status === 'initializing') return <div className="min-h-screen bg-[#FAF8F4] flex items-center justify-center text-[#6B7280]">Restoring secure session…</div>;
   if (status !== 'authenticated' || !principal) return <><LoginPage onGoToSignup={() => alert('Registration is not available yet. Please use a provisioned StayNest account.')} />{error ? <p className="fixed bottom-5 inset-x-4 text-center text-sm text-[#E56363]">{error}</p> : null}</>;
   if (principal.role === 'MERCHANT') return <MerchantApp />;
-  if (isAdminRole(principal.role)) return <AdminApp role={principal.role} />;
   return <div role="alert">This account cannot access the StayNest dashboard.</div>;
 }
