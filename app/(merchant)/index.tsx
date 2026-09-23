@@ -1,5 +1,5 @@
-import { FoundationScreen } from '@/components/foundation/FoundationScreen';
+import { Redirect } from 'expo-router';
 
-export default function MerchantPlaceholder() {
-  return <FoundationScreen label="Merchant application placeholder" />;
+export default function MerchantIndex() {
+  return <Redirect href="./(tabs)" />;
 }

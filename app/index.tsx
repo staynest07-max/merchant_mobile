@@ -1,5 +1,10 @@
-import { FoundationScreen } from '@/components/foundation/FoundationScreen';
+import { Redirect } from 'expo-router';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function IndexScreen() {
-  return <FoundationScreen label="Expo foundation is ready. Merchant features will be migrated in later phases." />;
+  const status = useAuthStore((state) => state.status);
+  const principal = useAuthStore((state) => state.principal);
+
+  if (status === 'initializing') return null;
+  return <Redirect href={status === 'authenticated' && principal?.role === 'MERCHANT' ? '/(merchant)' : '/(auth)'} />;
 }

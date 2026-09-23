@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { Sora_500Medium, Sora_600SemiBold, Sora_700Bold } from '@expo-google-fonts/sora';
@@ -12,6 +12,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { colors } from '@/design-system';
 import { queryClient } from '@/query/client';
+import { useInitializeAuth } from '@/features/auth/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -45,15 +47,46 @@ export default function RootLayout() {
       <GestureHandlerRootView style={styles.root}>
         <SafeAreaProvider>
           <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(merchant)" />
-            <Stack.Screen name="(merchant-onboarding)" />
-          </Stack>
+          <AuthGate />
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
+  );
+}
+
+function AuthGate() {
+  useInitializeAuth();
+  const router = useRouter();
+  const segments = useSegments();
+  const status = useAuthStore((state) => state.status);
+  const principal = useAuthStore((state) => state.principal);
+
+  useEffect(() => {
+    if (status === 'initializing') return;
+
+    const group = segments[0];
+    const isMerchant = status === 'authenticated' && principal?.role === 'MERCHANT';
+    const inMerchantArea = group === '(merchant)' || group === '(merchant-onboarding)';
+
+    if (!isMerchant && group !== '(auth)') router.replace('/(auth)');
+    if (isMerchant && !inMerchantArea) router.replace('/(merchant)');
+  }, [principal, router, segments, status]);
+
+  if (status === 'initializing') {
+    return (
+      <View style={styles.boot}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(merchant)" />
+      <Stack.Screen name="(merchant-onboarding)" />
+    </Stack>
   );
 }
 

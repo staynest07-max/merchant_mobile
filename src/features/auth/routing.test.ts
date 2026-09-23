@@ -1,53 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { AuthPrincipal } from '../../contracts/auth';
-import { dashboardPath, isAdminRole, navigateToPrincipalDashboard } from './routing';
+import { authDestination } from './routing';
 
-const principal = (role: AuthPrincipal['role']): AuthPrincipal => ({
-  accountId: 'account',
-  role,
-  sessionId: 'session',
-});
+const principal = (role: AuthPrincipal['role']): AuthPrincipal => ({ accountId: 'account', role, sessionId: 'session' });
 
-describe('dashboard routing', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
-  it.each([
-    ['MERCHANT', '/merchant'],
-    ['ADMIN', '/admin'],
-    ['SUPER_ADMIN', '/admin'],
-  ] as const)('maps %s to %s', (role, path) => {
-    expect(dashboardPath(role)).toBe(path);
-  });
-
-  it.each([
-    ['ADMIN', true],
-    ['SUPER_ADMIN', true],
-    ['MERCHANT', false],
-  ] as const)('identifies %s admin access', (role, expected) => {
-    expect(isAdminRole(role)).toBe(expected);
-  });
-
-  it('redirects an admin principal away from the merchant route', () => {
-    const replaceState = vi.fn();
-    vi.stubGlobal('window', {
-      location: { pathname: '/merchant' },
-      history: { replaceState },
-    });
-
-    navigateToPrincipalDashboard(principal('ADMIN'));
-
-    expect(replaceState).toHaveBeenCalledWith(null, '', '/admin');
-  });
-
-  it('preserves an authenticated admin sub-route', () => {
-    const replaceState = vi.fn();
-    vi.stubGlobal('window', {
-      location: { pathname: '/admin/accounts' },
-      history: { replaceState },
-    });
-
-    navigateToPrincipalDashboard(principal('SUPER_ADMIN'));
-
-    expect(replaceState).not.toHaveBeenCalled();
+describe('merchant mobile auth routing', () => {
+  it('waits while the session is initializing', () => expect(authDestination('initializing', null)).toBeNull());
+  it('routes unauthenticated users to login', () => expect(authDestination('unauthenticated', null)).toBe('/(auth)'));
+  it('routes an authenticated merchant to the Merchant application', () => expect(authDestination('authenticated', principal('MERCHANT'))).toBe('/(merchant)'));
+  it.each(['USER', 'ADMIN', 'SUPER_ADMIN'] as const)('never routes %s into Merchant screens', (role) => {
+    expect(authDestination('authenticated', principal(role))).toBe('/(auth)');
   });
 });

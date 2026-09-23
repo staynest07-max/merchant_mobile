@@ -1,28 +1,18 @@
-import type { AuthPrincipal, PlatformRole } from '../../contracts/auth';
+import type { AuthPrincipal } from '../../contracts/auth';
+import type { AuthStatus } from '../../stores/authStore';
 
-export type DashboardRole = Extract<PlatformRole, 'MERCHANT' | 'ADMIN' | 'SUPER_ADMIN'>;
-export type AdminRole = Extract<DashboardRole, 'ADMIN' | 'SUPER_ADMIN'>;
+export type AuthDestination = '/(auth)' | '/(merchant)';
 
-export function isAdminRole(role: PlatformRole): role is AdminRole {
-  return role === 'ADMIN' || role === 'SUPER_ADMIN';
+export function authDestination(
+  status: AuthStatus,
+  principal: AuthPrincipal | null
+): AuthDestination | null {
+  if (status === 'initializing') return null;
+  if (status !== 'authenticated' || !principal || principal.role !== 'MERCHANT') return '/(auth)';
+  return '/(merchant)';
 }
 
-export function dashboardPath(role: DashboardRole): '/merchant' | '/admin' {
-  return role === 'MERCHANT' ? '/merchant' : '/admin';
-}
-
-export function navigateToPrincipalDashboard(principal: AuthPrincipal): void {
-  if (principal.role !== 'MERCHANT' && !isAdminRole(principal.role)) {
-    return;
-  }
-
-  const target = dashboardPath(principal.role);
-  const isCurrentDashboard =
-    principal.role === 'MERCHANT'
-      ? window.location.pathname === '/merchant'
-      : window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/');
-
-  if (!isCurrentDashboard) {
-    window.history.replaceState(null, '', target);
-  }
+/** Kept only so the preserved web reference implementation continues to typecheck. */
+export function navigateToPrincipalDashboard(principal: AuthPrincipal): AuthDestination {
+  return authDestination('authenticated', principal) ?? '/(auth)';
 }
