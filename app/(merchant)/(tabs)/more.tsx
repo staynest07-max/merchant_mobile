@@ -8,7 +8,7 @@ import { merchantRoutes } from '@/navigation/merchantRoutes';
 
 const destinations = [
   ['Residents', merchantRoutes.residents], ['Money', merchantRoutes.money], ['Availability', merchantRoutes.availability],
-  ['Reviews', merchantRoutes.reviews], ['Notifications', merchantRoutes.notifications], ['Profile', merchantRoutes.profile], ['Onboarding', merchantRoutes.onboarding],
+  ['Reviews', merchantRoutes.reviews], ['Notifications', merchantRoutes.notifications], ['Profile', merchantRoutes.profile], ['Preferences', merchantRoutes.preferences], ['Onboarding', merchantRoutes.onboarding],
 ] as const;
 
 export default function MoreScreen() {

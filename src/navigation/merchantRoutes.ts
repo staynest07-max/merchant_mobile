@@ -16,6 +16,7 @@ export const merchantRoutes = {
   notifications: '/(merchant)/notifications',
   notificationDetail: '/(merchant)/notifications/[id]',
   profile: '/(merchant)/profile',
+  preferences: '/(merchant)/preferences',
   onboarding: '/(merchant-onboarding)',
 } as const;
 
@@ -38,5 +39,6 @@ export const merchantNavigationMatrix = [
   { web: 'Notifications', mobile: merchantRoutes.notifications, access: 'Global bell and More' },
   { web: 'Notification Detail', mobile: merchantRoutes.notificationDetail, access: 'Notifications listing' },
   { web: 'Profile', mobile: merchantRoutes.profile, access: 'More' },
+  { web: 'Preferences', mobile: merchantRoutes.preferences, access: 'More' },
   { web: 'Onboarding', mobile: merchantRoutes.onboarding, access: 'More' },
 ] as const;
