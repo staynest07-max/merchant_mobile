@@ -23,6 +23,10 @@ export const merchantRoutes = {
 
 export type MerchantDestination = keyof typeof merchantRoutes;
 
+export const merchantHomeMetricRoutes = {
+  residents: merchantRoutes.residents,
+} as const;
+
 export const merchantNavigationMatrix = [
   { web: 'Home', mobile: merchantRoutes.home, access: 'Home bottom tab' },
   { web: 'My PGs', mobile: merchantRoutes.pgs, access: 'My PGs bottom tab' },

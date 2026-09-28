@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { merchantNavigationMatrix, merchantRoutes } from './merchantRoutes';
+import { merchantHomeMetricRoutes, merchantNavigationMatrix, merchantRoutes } from './merchantRoutes';
 
 describe('Merchant navigation inventory', () => {
   it('keeps every approved Merchant destination reachable', () => {
@@ -20,5 +20,9 @@ describe('Merchant navigation inventory', () => {
     expect(merchantRoutes.residentDetail).toBe('/(merchant)/residents/[id]');
     expect(merchantRoutes.preferences).toBe('/(merchant)/preferences');
     expect(merchantRoutes.onboarding).toBe('/(merchant-onboarding)');
+  });
+
+  it('routes the Home Residents metric to the resident listing', () => {
+    expect(merchantHomeMetricRoutes.residents).toBe('/(merchant)/residents');
   });
 });
