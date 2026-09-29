@@ -7,6 +7,8 @@ export function authMessage(error: unknown): string {
   if (error instanceof ApiError) {
     const messages: Record<string, string> = {
       INVALID_OTP: 'The OTP is invalid or expired.',
+      ACCOUNT_EXISTS: 'A merchant account already exists for this mobile number.',
+      ACCOUNT_DISABLED: 'This merchant account is not eligible to sign in.',
       SESSION_REVOKED: 'Your session has ended. Please sign in again.',
       SESSION_EXPIRED: 'Your session has expired. Please sign in again.',
       ROLE_FORBIDDEN: 'This account is not authorized for StayNest Merchant.',

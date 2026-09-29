@@ -23,7 +23,11 @@ export default function OtpScreen() {
       return;
     }
     setLocalError(null);
-    verifyOtp.mutate({ phone, otp });
+    verifyOtp.mutate({ phone, otp }, {
+      onSuccess: (result) => {
+        if (result.kind === 'signup_required') router.push({ pathname: './signup', params: { phone, otp } });
+      },
+    });
   };
 
   return (

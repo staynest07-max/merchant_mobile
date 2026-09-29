@@ -1,5 +1,5 @@
 import { apiClient, clearAccessToken, setAccessToken } from '../../../api/client';
-import type { AuthMeResult, AuthPrincipal, AuthTokens, RequestOtpResult } from '../../../contracts/auth';
+import type { AuthMeResult, AuthPrincipal, AuthTokens, MerchantSignupRequest, MerchantSignupRequired, RequestOtpResult, VerifyOtpResult } from '../../../contracts/auth';
 import { clearRefreshToken, getRefreshToken, saveRefreshToken } from '../../../storage/secureTokens';
 import { isMerchantRole } from '../../../stores/authStore';
 
@@ -28,11 +28,27 @@ export const authService = {
     )).data;
   },
 
-  async verifyOtp(phone: string, otp: string): Promise<AuthPrincipal> {
+  async verifyOtp(phone: string, otp: string): Promise<VerifyOtpResult> {
     try {
-      const response = await apiClient.post<AuthTokens>(
+      const response = await apiClient.post<AuthTokens | MerchantSignupRequired>(
         '/auth/verify-otp',
         { phone, otp },
+        { authenticated: false }
+      );
+      if (isSignupRequired(response.data)) return { kind: 'signup_required' };
+      await accept(response.data);
+      return { kind: 'authenticated', principal: await this.me(true) };
+    } catch (error) {
+      await clearCredentials();
+      throw error;
+    }
+  },
+
+  async signup(input: MerchantSignupRequest): Promise<AuthPrincipal> {
+    try {
+      const response = await apiClient.post<AuthTokens, MerchantSignupRequest>(
+        '/auth/merchant-signup',
+        input,
         { authenticated: false }
       );
       await accept(response.data);
@@ -76,3 +92,7 @@ export const authService = {
 
   clearCredentials,
 };
+
+function isSignupRequired(data: AuthTokens | MerchantSignupRequired): data is MerchantSignupRequired {
+  return 'signupRequired' in data && data.signupRequired === true && !('accessToken' in data);
+}

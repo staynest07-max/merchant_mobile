@@ -31,13 +31,31 @@ describe('merchant auth service', () => {
     expect(post).toHaveBeenCalledWith('/auth/request-otp', { phone: '9876543210' }, { authenticated: false });
   });
 
-  it.each(['654321', '160999'])('verifies the six-digit OTP %s only through the backend', async (otp) => {
+  it.each(['654321', '111111'])('forwards the entered OTP %s to the backend without interpreting it', async (otp) => {
     post.mockResolvedValueOnce({ data: tokens() });
     get.mockResolvedValueOnce({ data: { principal: principal() } });
-    await expect(authService.verifyOtp('9876543210', otp)).resolves.toMatchObject({ role: 'MERCHANT' });
+    await expect(authService.verifyOtp('9876543210', otp)).resolves.toMatchObject({ kind: 'authenticated', principal: { role: 'MERCHANT' } });
     expect(post).toHaveBeenCalledWith('/auth/verify-otp', { phone: '9876543210', otp }, { authenticated: false });
     expect(saveRefreshToken).toHaveBeenCalledWith('refresh-token');
     expect(setAccessToken).toHaveBeenCalledWith('access-token');
+  });
+
+  it('returns signup required without storing a session when the backend asks for merchant signup', async () => {
+    post.mockResolvedValueOnce({ data: { signupRequired: true } });
+    await expect(authService.verifyOtp('9876543210', '654321')).resolves.toEqual({ kind: 'signup_required' });
+    expect(saveRefreshToken).not.toHaveBeenCalled();
+    expect(setAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('creates a merchant account only with the backend signup payload', async () => {
+    const input = { phone: '9876543210', otp: '654321', fullName: 'New Owner', businessName: 'New Stay' };
+    post.mockResolvedValueOnce({ data: tokens() });
+    get.mockResolvedValueOnce({ data: { principal: principal() } });
+    await expect(authService.signup(input)).resolves.toMatchObject({ role: 'MERCHANT' });
+    expect(post).toHaveBeenCalledWith('/auth/merchant-signup', input, { authenticated: false });
+    expect(input).not.toHaveProperty('role');
+    expect(input).not.toHaveProperty('accountId');
+    expect(input).not.toHaveProperty('merchantId');
   });
 
   it('clears credentials when the backend rejects an invalid OTP', async () => {

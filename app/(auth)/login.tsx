@@ -30,7 +30,7 @@ export default function MerchantLoginScreen() {
         <View style={styles.content}>
           <Text style={styles.brand}>STAYNEST</Text>
           <Text style={styles.title}>Merchant sign in</Text>
-          <Text style={styles.subtitle}>Use the mobile number registered with your merchant account.</Text>
+          <Text style={styles.subtitle}>Enter your mobile number to sign in or create a merchant account.</Text>
           <Text style={styles.label}>Mobile number</Text>
           <View style={styles.inputRow}>
             <Text style={styles.prefix}>+91</Text>
