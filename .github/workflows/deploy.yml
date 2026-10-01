@@ -33,7 +33,7 @@ jobs:
 
       - name: Export Expo web app
         env:
-          EXPO_PUBLIC_API_BASE_URL: https://backend-bk0a.onrender.com/api/v1
+          EXPO_PUBLIC_API_BASE_URL: https://stay-mate.tail4aeac8.ts.net/api/v1
         run: |
           npx expo export --platform web
           touch dist/.nojekyll
